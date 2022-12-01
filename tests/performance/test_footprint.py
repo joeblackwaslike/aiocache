@@ -46,7 +46,7 @@ class TestRedis:
         values = ["a", "b", "c", "d", "e", "f"]
         for _n in range(N):
             start = time.time()
-            await redis.mset(*[x for x in values * 2])
+            await redis.mset(*list(values * 2))
             await redis.mget(*values)
             for k in values:
                 await redis.delete(k)

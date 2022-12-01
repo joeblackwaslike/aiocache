@@ -122,9 +122,7 @@ class PickleSerializer(BaseSerializer):
         :param value: bytes
         :returns: obj
         """
-        if value is None:
-            return None
-        return pickle.loads(value)  # noqa: S301
+        return None if value is None else pickle.loads(value)
 
 
 class JsonSerializer(BaseSerializer):
@@ -154,9 +152,7 @@ class JsonSerializer(BaseSerializer):
         :param value: str
         :returns: output of ``json.loads``.
         """
-        if value is None:
-            return None
-        return json.loads(value)
+        return None if value is None else json.loads(value)
 
 
 class MsgPackSerializer(BaseSerializer):
@@ -192,7 +188,7 @@ class MsgPackSerializer(BaseSerializer):
         :param value: bytes
         :returns: obj
         """
-        raw = False if self.encoding == "utf-8" else True
         if value is None:
             return None
+        raw = self.encoding != "utf-8"
         return msgpack.loads(value, raw=raw, use_list=self.use_list)

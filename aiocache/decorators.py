@@ -136,8 +136,7 @@ class cached:
 
     async def get_from_cache(self, key):
         try:
-            value = await self.cache.get(key)
-            return value
+            return await self.cache.get(key)
         except Exception:
             logger.exception("Couldn't retrieve %s, unexpected error", key)
 
@@ -359,8 +358,7 @@ class multi_cached:
         if not keys:
             return []
         try:
-            values = await self.cache.multi_get(keys)
-            return values
+            return await self.cache.multi_get(keys)
         except Exception:
             logger.exception("Couldn't retrieve %s, unexpected error", keys)
             return [None] * len(keys)

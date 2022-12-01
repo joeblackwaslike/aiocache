@@ -338,10 +338,7 @@ class TestRedisCache:
     def test_parse_uri_path(self, path, expected):
         assert RedisCache().parse_uri_path(path) == expected
 
-    @pytest.mark.parametrize(
-        "namespace, expected",
-        ([None, "test:" + Keys.KEY], ["", Keys.KEY], ["my_ns", "my_ns:" + Keys.KEY]),
-    )
+    @pytest.mark.parametrize("namespace, expected", ([None, f"test:{Keys.KEY}"], ["", Keys.KEY], ["my_ns", f"my_ns:{Keys.KEY}"]))
     def test_build_key_double_dot(self, set_test_namespace, redis_cache, namespace, expected):
         assert redis_cache.build_key(Keys.KEY, namespace=namespace) == expected
 

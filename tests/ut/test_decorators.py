@@ -15,9 +15,7 @@ from aiocache.lock import RedLock
 
 async def stub(*args, value=None, seconds=0, **kwargs):
     await asyncio.sleep(seconds)
-    if value:
-        return str(value)
-    return str(random.randint(1, 50))
+    return str(value) if value else str(random.randint(1, 50))
 
 
 class TestCached:
@@ -28,8 +26,7 @@ class TestCached:
 
     @pytest.fixture
     def decorator_call(self, decorator):
-        d = decorator(stub)
-        yield d
+        yield decorator(stub)
 
     @pytest.fixture(autouse=True)
     def spy_stub(self, mocker):

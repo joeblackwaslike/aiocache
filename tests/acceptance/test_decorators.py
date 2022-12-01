@@ -9,17 +9,15 @@ from aiocache import cached, cached_stampede, multi_cached
 
 
 async def return_dict(keys=None):
-    ret = {}
-    for value, key in enumerate(keys or [Keys.KEY, Keys.KEY_1]):
-        ret[key] = str(value)
-    return ret
+    return {
+        key: str(value)
+        for value, key in enumerate(keys or [Keys.KEY, Keys.KEY_1])
+    }
 
 
 async def stub(*args, key=None, seconds=0, **kwargs):
     await asyncio.sleep(seconds)
-    if key:
-        return str(key)
-    return str(random.randint(1, 50))
+    return str(key) if key else str(random.randint(1, 50))
 
 
 class TestCached:
@@ -131,8 +129,8 @@ class TestMultiCachedDecorator:
             return {Keys.KEY: 1, Keys.KEY_1: 2}
 
         await fn("self", keys=[Keys.KEY, Keys.KEY_1])
-        assert await cache.exists("fn_" + Keys.KEY + "_ES") is True
-        assert await cache.exists("fn_" + Keys.KEY_1 + "_ES") is True
+        assert await cache.exists(f"fn_{Keys.KEY}_ES") is True
+        assert await cache.exists(f"fn_{Keys.KEY_1}_ES") is True
 
     @pytest.mark.asyncio
     async def test_fn_with_args(self, cache):
