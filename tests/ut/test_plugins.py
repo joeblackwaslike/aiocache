@@ -11,9 +11,9 @@ class TestBasePlugin:
     @pytest.mark.asyncio
     async def test_interface_methods(self):
         for method in API.CMDS:
-            pre = await getattr(BasePlugin, "pre_{}".format(method.__name__))(MagicMock())
+            pre = await getattr(BasePlugin, f"pre_{method.__name__}")(MagicMock())
             assert pre is None
-            post = await getattr(BasePlugin, "post_{}".format(method.__name__))(MagicMock())
+            post = await getattr(BasePlugin, f"post_{method.__name__}")(MagicMock())
             assert post is None
 
     @pytest.mark.asyncio
@@ -46,8 +46,8 @@ class TestTimingPlugin:
     @pytest.mark.asyncio
     async def test_interface_methods(self):
         for method in API.CMDS:
-            assert hasattr(TimingPlugin, "pre_{}".format(method.__name__))
-            assert hasattr(TimingPlugin, "post_{}".format(method.__name__))
+            assert hasattr(TimingPlugin, f"pre_{method.__name__}")
+            assert hasattr(TimingPlugin, f"post_{method.__name__}")
 
 
 class TestHitMissRatioPlugin:

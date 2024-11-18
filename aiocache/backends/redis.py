@@ -111,20 +111,14 @@ class RedisBackend:
     async def _cas(self, key, value, token, ttl=None, _conn=None):
         args = [value, token]
         if ttl is not None:
-            if isinstance(ttl, float):
-                args += ["PX", int(ttl * 1000)]
-            else:
-                args += ["EX", ttl]
-        res = await self._raw("eval", self.CAS_SCRIPT, [key], args, _conn=_conn)
-        return res
+            args += ["PX", int(ttl * 1000)] if isinstance(ttl, float) else ["EX", ttl]
+        return await self._raw("eval", self.CAS_SCRIPT, [key], args, _conn=_conn)
 
     @conn
     async def _multi_set(self, pairs, ttl=None, _conn=None):
-        ttl = ttl or 0
-
         flattened = list(itertools.chain.from_iterable((key, value) for key, value in pairs))
 
-        if ttl:
+        if ttl := ttl or 0:
             await self.__multi_set_ttl(_conn, flattened, ttl)
         else:
             await _conn.mset(*flattened)
@@ -145,13 +139,13 @@ class RedisBackend:
             expx = {"pexpire": int(ttl * 1000)}
         was_set = await _conn.set(key, value, exist=_conn.SET_IF_NOT_EXIST, **expx)
         if not was_set:
-            raise ValueError("Key {} already exists, use .set to update the value".format(key))
+            raise ValueError(f"Key {key} already exists, use .set to update the value")
         return was_set
 
     @conn
     async def _exists(self, key, _conn=None):
         exists = await _conn.exists(key)
-        return True if exists > 0 else False
+        return exists > 0
 
     @conn
     async def _increment(self, key, delta, _conn=None):
@@ -162,9 +156,7 @@ class RedisBackend:
 
     @conn
     async def _expire(self, key, ttl, _conn=None):
-        if ttl == 0:
-            return await _conn.persist(key)
-        return await _conn.expire(key, ttl)
+        return await _conn.persist(key) if ttl == 0 else await _conn.expire(key, ttl)
 
     @conn
     async def _delete(self, key, _conn=None):
@@ -173,7 +165,7 @@ class RedisBackend:
     @conn
     async def _clear(self, namespace=None, _conn=None):
         if namespace:
-            keys = await _conn.keys("{}:*".format(namespace))
+            keys = await _conn.keys(f"{namespace}:*")
             if keys:
                 await _conn.delete(*keys)
         else:
@@ -203,8 +195,8 @@ class RedisBackend:
                     "encoding": "utf-8",
                     "minsize": self.pool_min_size,
                     "maxsize": self.pool_max_size,
+                    "create_connection_timeout": self.create_connection_timeout,
                 }
-                kwargs["create_connection_timeout"] = self.create_connection_timeout
 
                 self._pool = await aioredis.create_pool((self.endpoint, self.port), **kwargs)
 
@@ -259,10 +251,10 @@ class RedisCache(RedisBackend, BaseCache):
 
     def _build_key(self, key, namespace=None):
         if namespace is not None:
-            return "{}{}{}".format(namespace, ":" if namespace else "", key)
+            return f'{namespace}{":" if namespace else ""}{key}'
         if self.namespace is not None:
-            return "{}{}{}".format(self.namespace, ":" if self.namespace else "", key)
+            return f'{self.namespace}{":" if self.namespace else ""}{key}'
         return key
 
     def __repr__(self):  # pragma: no cover
-        return "RedisCache ({}:{})".format(self.endpoint, self.port)
+        return f"RedisCache ({self.endpoint}:{self.port})"

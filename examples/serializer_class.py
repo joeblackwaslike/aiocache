@@ -13,15 +13,15 @@ class CompressionSerializer(BaseSerializer):
     DEFAULT_ENCODING = None
 
     def dumps(self, value):
-        print("I've received:\n{}".format(value))
+        print(f"I've received:\n{value}")
         compressed = zlib.compress(value.encode())
-        print("But I'm storing:\n{}".format(compressed))
+        print(f"But I'm storing:\n{compressed}")
         return compressed
 
     def loads(self, value):
-        print("I've retrieved:\n{}".format(value))
+        print(f"I've retrieved:\n{value}")
         decompressed = zlib.decompress(value).decode()
-        print("But I'm returning:\n{}".format(decompressed))
+        print(f"But I'm returning:\n{decompressed}")
         return decompressed
 
 

@@ -17,10 +17,11 @@ class BasePlugin:
 
 
 BasePlugin.add_hook(
-    BasePlugin.do_nothing, ["pre_{}".format(method.__name__) for method in API.CMDS]
+    BasePlugin.do_nothing, [f"pre_{method.__name__}" for method in API.CMDS]
 )
+
 BasePlugin.add_hook(
-    BasePlugin.do_nothing, ["post_{}".format(method.__name__) for method in API.CMDS]
+    BasePlugin.do_nothing, [f"post_{method.__name__}" for method in API.CMDS]
 )
 
 
@@ -56,7 +57,7 @@ class TimingPlugin(BasePlugin):
 
 for method in API.CMDS:
     TimingPlugin.add_hook(
-        TimingPlugin.save_time(method.__name__), ["post_{}".format(method.__name__)]
+        TimingPlugin.save_time(method.__name__), [f"post_{method.__name__}"]
     )
 
 
@@ -70,10 +71,7 @@ class HitMissRatioPlugin(BasePlugin):
 
     async def post_get(self, client, key, took=0, ret=None, **kwargs):
         if not hasattr(client, "hit_miss_ratio"):
-            client.hit_miss_ratio = {}
-            client.hit_miss_ratio["total"] = 0
-            client.hit_miss_ratio["hits"] = 0
-
+            client.hit_miss_ratio = {"total": 0, "hits": 0}
         client.hit_miss_ratio["total"] += 1
         if ret is not None:
             client.hit_miss_ratio["hits"] += 1
@@ -84,10 +82,7 @@ class HitMissRatioPlugin(BasePlugin):
 
     async def post_multi_get(self, client, keys, took=0, ret=None, **kwargs):
         if not hasattr(client, "hit_miss_ratio"):
-            client.hit_miss_ratio = {}
-            client.hit_miss_ratio["total"] = 0
-            client.hit_miss_ratio["hits"] = 0
-
+            client.hit_miss_ratio = {"total": 0, "hits": 0}
         client.hit_miss_ratio["total"] += len(keys)
         for result in ret:
             if result is not None:

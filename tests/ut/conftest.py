@@ -73,11 +73,9 @@ def base_cache():
 
 @pytest.fixture
 def redis_cache():
-    cache = RedisCache()
-    return cache
+    return RedisCache()
 
 
 @pytest.fixture
 def memcached_cache():
-    cache = MemcachedCache()
-    return cache
+    return MemcachedCache()
